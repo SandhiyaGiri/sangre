@@ -3,6 +3,8 @@
 import { useEffect, useState, useRef } from 'react';
 import { useConversation } from '@elevenlabs/react';
 import AnimatedOrb from '@/components/AnimatedOrb';
+import BloodReportViewer from '@/components/BloodReportViewer';
+import { useBloodReport } from '@/lib/useBloodReport';
 
 interface Message {
   id: string;
@@ -16,9 +18,13 @@ export default function Home() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [currentTranscription, setCurrentTranscription] = useState('');
   const [isAgentSpeaking, setIsAgentSpeaking] = useState(false);
+  const [showReport, setShowReport] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messageCountRef = useRef(0);
   const agentSpeakingTimeoutRef = useRef<NodeJS.Timeout>();
+
+  // Load blood report
+  const { report, loading: reportLoading, error: reportError, loadReport } = useBloodReport();
 
   const conversation = useConversation({
     onConnect: () => {
@@ -228,6 +234,11 @@ export default function Home() {
                 <div ref={messagesEndRef} />
               </>
             )}
+
+            {/* Blood Report Viewer */}
+            {showReport && (
+              <BloodReportViewer report={report} isVisible={showReport} />
+            )}
           </div>
 
           {/* Control Panel */}
@@ -267,6 +278,34 @@ export default function Home() {
                 End Call
               </button>
             </div>
+
+            {/* Report Controls */}
+            <div className="flex gap-3">
+              <button
+                onClick={() => {
+                  setShowReport(false);
+                  loadReport();
+                  setShowReport(true);
+                }}
+                disabled={reportLoading}
+                className="flex-1 bg-purple-600 hover:bg-purple-700 disabled:bg-gray-700 text-white font-semibold py-2 rounded-lg transition-colors text-sm"
+              >
+                {reportLoading ? 'Loading Report...' : '📋 Load Blood Report'}
+              </button>
+              <button
+                onClick={() => setShowReport(!showReport)}
+                disabled={!report}
+                className="flex-1 bg-indigo-600 hover:bg-indigo-700 disabled:bg-gray-700 text-white font-semibold py-2 rounded-lg transition-colors text-sm"
+              >
+                {showReport ? '✖ Hide Report' : '👁️ Show Report'}
+              </button>
+            </div>
+
+            {reportError && (
+              <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-900">
+                Error loading report: {reportError}
+              </div>
+            )}
           </div>
           </div>
         </div>
