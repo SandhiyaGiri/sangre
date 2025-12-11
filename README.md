@@ -1,463 +1,413 @@
-# ElevenLabs Agent UI
+# Telehealth Insight Companion
 
-A modern, professional web interface for conversing with ElevenLabs AI agents via voice and text. Built with Next.js, React, and the ElevenLabs SDK.
+A multilingual AI-powered health report assistant that helps patients understand their lab results through empathetic, voice-based conversations with guardrail-heavy safety measures.
 
-![Status: Production Ready](https://img.shields.io/badge/status-production%20ready-brightgreen)
-![License: MIT](https://img.shields.io/badge/license-MIT-blue)
-![Built with: Next.js](https://img.shields.io/badge/built%20with-Next.js-black)
+## 🎯 Vision
 
----
+Enable patients to upload their health/blood reports (JSON format) and have an interactive conversation with an AI assistant that:
+- Explains findings in their preferred language (English, Tamil, Malayalam, Kannada, Hindi)
+- Provides empathetic, informational guidance (not diagnostic)
+- Generates shareable session summaries
+- Maintains strict safety guardrails throughout
 
-## Features
+## ✨ Core Features
 
-✨ **Real-Time Voice Conversation**
-- WebRTC-based voice communication
-- Automatic fallback to WebSocket if needed
-- Low-latency audio streaming
+### 1. Report Upload & Validation
+- Accept JSON health reports with standardized schema
+- Validate patient info, test dates, and lab values
+- Generate unique report IDs for tracking
+- Provide clear error messages for invalid data
 
-💬 **Smart Chat Interface**
-- Full conversation history
-- Color-coded user and agent messages
-- Automatic message scrolling
-- Timestamps on all messages
+### 2. Insight Preparation Pipeline
+- Normalize lab units and values
+- Flag out-of-range results (warning/critical levels)
+- Generate headline insights and risk tags
+- Prepare structured context for conversation
 
-🎤 **Live Transcription**
-- Real-time display of your speech
-- See what you're saying as you speak
-- Clear distinction between transcription and confirmed messages
+### 3. Conversational Agent
+- Real-time voice interaction via ElevenLabs WebRTC
+- Acknowledges uploaded report and patient context
+- Answers follow-up questions about findings
+- Maintains conversation history with timestamps
+- Supports interruptions and natural turn-taking
 
-🎨 **Beautiful Animations**
-- Animated 3D orb that reacts to agent state
-- Pulsing indicator when connected
-- Bouncing animation when agent is thinking
-- Smooth transitions and effects
+### 4. Multilingual Support
+- Auto-detect user language from input
+- Manual language selection available
+- Full UI and response translation
+- Supported: English, Tamil, Malayalam, Kannada, Hindi
 
-📱 **Responsive Design**
-- Works on mobile and desktop
-- Dark theme with professional styling
-- Optimized layout for all screen sizes
+### 5. Session Summary
+- Automatic summary generation after conversation ends
+- Extracts key findings and recommendations
+- Lists follow-up actions
+- Downloadable as text file
+- Ready for email sharing (stub for hackathon)
 
-⚡ **Optimized Performance**
-- 227 KB first-load JavaScript
-- CSS-based animations (no JavaScript overhead)
-- Efficient state management
-- Auto-cleanup of resources
+## 🏗️ Architecture
 
----
+### Frontend (React + Next.js 15)
+```
+app/
+├── page.tsx                    # Main app with 3 states: upload/conversation/summary
+├── api/
+│   ├── upload-report/route.ts # Report validation & storage
+│   └── summaries/route.ts     # Summary generation endpoint
+└── globals.css                # Global styling
 
-## Quick Start
+components/
+├── AnimatedOrb.tsx            # 3D orb visualization
+├── ReportUploader.tsx         # File upload UI
+├── SessionSummary.tsx         # Summary display modal
+└── LanguageSelector.tsx       # Language switcher
 
-### Prerequisites
-- Node.js 18+ installed
-- npm or yarn package manager
-- Modern web browser (Chrome, Firefox, Safari, Edge)
+lib/
+├── reportSchema.ts            # Schema validation logic
+├── insightPipeline.ts         # Lab value flagging & insights
+└── translations.ts            # Multilingual strings
+```
+
+### Backend (Next.js API Routes)
+- **In-memory storage** for hackathon (reports & summaries)
+- **Report validation** against schema
+- **Insight generation** with reference ranges
+- **Summary extraction** from conversation transcripts
+
+### External Integration
+- **ElevenLabs Agent**: Voice conversation via WebRTC
+- **Agent ID**: `agent_7101k5zvyjhmfg983brhmhkd98n6`
+
+## 📋 Report Schema
+
+### Expected JSON Format
+```json
+{
+  "patient": {
+    "name": "string",
+    "age": "number",
+    "gender": "M|F|Other",
+    "email": "string (optional)",
+    "phone": "string (optional)"
+  },
+  "test_date": "YYYY-MM-DD",
+  "lab_name": "string (optional)",
+  "lab_values": [
+    {
+      "name": "string",
+      "value": "number",
+      "unit": "string",
+      "referenceMin": "number (optional)",
+      "referenceMax": "number (optional)"
+    }
+  ],
+  "notes": "string (optional)"
+}
+```
+
+See `sample-report.json` for a complete example.
+
+## 🚀 Quick Start
 
 ### Installation
-
 ```bash
-# Clone or download the project
-cd elevenlabs-agent-ui
-
-# Install dependencies
 npm install
-
-# Start development server
-npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) in your browser.
-
-### Configuration
-
-Edit `.env.local` with your ElevenLabs Agent ID:
-
-```env
-NEXT_PUBLIC_ELEVENLABS_AGENT_ID=your_agent_id_here
+### Environment Setup
+Create `.env.local`:
 ```
-
-Get your Agent ID from the [ElevenLabs Dashboard](https://elevenlabs.io/app).
-
----
-
-## Usage
-
-1. **Start a Conversation**
-   - Click "Start Conversation" button
-   - Allow microphone access when prompted
-   - Wait for connection (green indicator will appear)
-
-2. **Speak Naturally**
-   - Your speech appears in real-time italics
-   - When recognized, it becomes a blue message bubble
-   - The animated orb shows connection state
-
-3. **Watch the Agent Respond**
-   - Agent responses appear as gray bubbles
-   - The orb bounces when the agent is speaking
-   - Full message history is maintained
-
-4. **End the Conversation**
-   - Click "End Call" to disconnect
-   - History is preserved until you start a new conversation
-
----
-
-## Project Structure
-
+NEXT_PUBLIC_ELEVENLABS_AGENT_ID=agent_7101k5zvyjhmfg983brhmhkd98n6
 ```
-elevenlabs-agent-ui/
-├── app/
-│   ├── page.tsx              # Main conversation interface
-│   ├── layout.tsx            # Root layout
-│   └── globals.css           # Global styles
-├── components/
-│   └── AnimatedOrb.tsx       # 3D animated orb visualization
-├── .env.local                # Environment variables (Agent ID)
-├── package.json              # Dependencies
-├── tsconfig.json             # TypeScript config
-├── tailwind.config.js        # Tailwind CSS config
-├── next.config.js            # Next.js config
-└── postcss.config.js         # PostCSS config
-```
-
----
-
-## Key Technologies
-
-| Technology | Version | Purpose |
-|-----------|---------|---------|
-| Next.js | 15.5.7 | React framework with App Router |
-| React | 18.3.1 | UI library |
-| TypeScript | 5.x | Type-safe development |
-| Tailwind CSS | 3.4.0 | Utility-first styling |
-| @elevenlabs/react | 0.12.1 | Agent SDK |
-| WebRTC | Native | Voice communication |
-
----
-
-## Build & Deployment
 
 ### Development
 ```bash
-npm run dev              # Start dev server on localhost:3000
-npm run lint            # Check for linting errors
+npm run dev
+```
+Open `http://localhost:3000`
+
+### Production Build
+```bash
+npm run build
+npm start
 ```
 
-### Production
-```bash
-npm run build           # Create optimized build
-npm start              # Start production server
+## 📖 User Flow
+
+1. **Upload Report** → User selects JSON file with health data
+2. **Validate** → Backend checks schema and flags issues
+3. **Start Conversation** → User clicks "Start Conversation"
+4. **Discuss** → User asks questions, agent explains findings
+5. **End Session** → User clicks "End Call"
+6. **Summary** → Auto-generated recap with findings & recommendations
+7. **Download/Share** → User can download summary or email it
+
+## 🔐 Safety & Guardrails
+
+### Current Implementation
+- Input validation on all report uploads
+- Output moderation hooks (placeholder for guardrail specs)
+- No diagnostic claims (informational only)
+- Clear disclaimers in summaries
+
+### Future Guardrails (to be supplied)
+- Central instruction file for agent persona
+- Runtime safety checks (input sanitization, output filtering)
+- Allowed/disallowed topics
+- Escalation protocols for critical findings
+
+## 🧪 Testing
+
+### Test with Sample Report
+1. Download or copy `sample-report.json`
+2. Upload via UI
+3. Start conversation and ask questions like:
+   - "What does my glucose level mean?"
+   - "Are my cholesterol levels okay?"
+   - "What should I do about my results?"
+
+### Example Questions
+- "Explain my hemoglobin result"
+- "Why is my LDL high?"
+- "What lifestyle changes help with triglycerides?"
+- "When should I retest?"
+
+## 📊 Lab Value Reference Ranges
+
+The system includes common reference ranges for:
+- **Blood Counts**: Hemoglobin, Hematocrit, WBC, RBC, Platelets
+- **Metabolic**: Glucose, Creatinine, BUN
+- **Electrolytes**: Sodium, Potassium, Calcium, Magnesium, Phosphorus
+- **Liver Function**: AST, ALT, Alkaline Phosphatase, Bilirubin
+- **Lipids**: LDL, HDL, Triglycerides, Total Cholesterol
+- **Thyroid**: TSH
+
+Custom reference ranges can be provided per lab value.
+
+## 🌐 Multilingual Features
+
+### Supported Languages
+- **English** (en)
+- **Tamil** (ta)
+- **Malayalam** (ml)
+- **Kannada** (kn)
+- **Hindi** (hi)
+
+### Language Detection
+- Auto-detects from user input (checks for language-specific Unicode)
+- Manual selection via language selector buttons
+- All UI strings translated
+- Agent responses translated via ElevenLabs
+
+## 📱 Responsive Design
+
+- Mobile-first approach with Tailwind CSS
+- Works on phones, tablets, and desktops
+- Touch-friendly buttons and inputs
+- Optimized chat interface for all screen sizes
+
+## 🔄 State Management
+
+Three main app states:
+1. **Upload** - Report file selection and validation
+2. **Conversation** - Voice chat with agent
+3. **Summary** - Session recap and download
+
+Transitions:
+- Upload → Conversation (on successful upload)
+- Conversation → Summary (on "End Call")
+- Summary → Upload (on "Back" button)
+
+## 🎨 UI/UX Highlights
+
+- **Dark theme** with blue accents for professional look
+- **Animated orb** shows connection state and agent speaking
+- **Real-time transcription** displays user speech as it's recognized
+- **Color-coded messages** (blue=user, gray=agent)
+- **Status indicators** show connection health
+- **Thinking animation** (bouncing dots) when agent is processing
+
+## 🔧 Technical Stack
+
+- **Framework**: Next.js 15.5.7 (App Router)
+- **Language**: TypeScript 5
+- **Styling**: Tailwind CSS 3.4.0
+- **Agent SDK**: @elevenlabs/react 0.12.1
+- **Connection**: WebRTC (real-time voice)
+- **State**: React Hooks (useState, useRef, useEffect)
+
+## 📝 API Endpoints
+
+### POST /api/upload-report
+Upload and validate a health report.
+
+**Request:**
+```json
+{
+  "patient": { ... },
+  "test_date": "2024-12-11",
+  "lab_values": [ ... ]
+}
 ```
 
-### Deploy to Vercel (Recommended)
-```bash
-# Install Vercel CLI
-npm i -g vercel
+**Response:**
+```json
+{
+  "success": true,
+  "report_id": "report_1734000000000_abc123def",
+  "patient_name": "John Doe",
+  "test_date": "2024-12-11",
+  "insights": {
+    "headline_insights": ["All values within normal range"],
+    "risk_tags": ["metabolic"],
+    "flagged_count": 0
+  }
+}
+```
 
-# Deploy
+### GET /api/upload-report?report_id=...
+Retrieve a stored report and its insights.
+
+### POST /api/summaries
+Generate a session summary from conversation transcript.
+
+**Request:**
+```json
+{
+  "report_id": "report_...",
+  "transcript": [
+    { "role": "user", "content": "...", "timestamp": "..." },
+    { "role": "agent", "content": "...", "timestamp": "..." }
+  ],
+  "language": "en"
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "summary": {
+    "report_id": "report_...",
+    "generated_at": "2024-12-11T...",
+    "findings": ["..."],
+    "recommendations": ["..."],
+    "follow_up_actions": ["..."]
+  }
+}
+```
+
+### GET /api/summaries?report_id=...
+Retrieve a generated summary.
+
+## 🚀 Deployment
+
+### Vercel (Recommended)
+```bash
+npm install -g vercel
 vercel
-
-# Set environment variable during deployment
-vercel env add NEXT_PUBLIC_ELEVENLABS_AGENT_ID your_agent_id
 ```
 
-### Deploy to Other Platforms
-- **AWS**: Use AWS Amplify or Elastic Beanstalk
-- **Google Cloud**: Use Cloud Run or App Engine
-- **Azure**: Use App Service
-- **Docker**: Include Dockerfile for containerization
-
----
-
-## Error Handling
-
-### Connection Issues
-
-The app includes automatic error handling and fallback strategies:
-
-1. **WebRTC Failure** → Falls back to WebSocket
-2. **Invalid Agent ID** → Shows error in chat
-3. **Microphone Denied** → Shows permission error
-4. **Network Error** → Suggests retry
-
-See [TROUBLESHOOTING.md](./TROUBLESHOOTING.md) for detailed solutions.
-
----
-
-## Development
-
-### Component Architecture
-
-**Main Component** (`app/page.tsx`)
-- Manages conversation state
-- Handles user interactions
-- Displays UI layout
-- Integrates with ElevenLabs SDK
-
-**Animated Orb** (`components/AnimatedOrb.tsx`)
-- Reusable visualization component
-- Responsive sizing
-- CSS animations
-- Connection state feedback
-
-### State Management
-
-Uses React Hooks for state:
-- `isLoading` - Connection loading state
-- `messages` - Conversation history
-- `currentTranscription` - Real-time speech
-- `isAgentSpeaking` - Agent speech indicator
-
-### Message Flow
-
-```
-User speaks
-    ↓
-Real-time transcription appears
-    ↓
-User message sent to agent
-    ↓
-Agent processes (bouncing dots shown)
-    ↓
-Agent response received
-    ↓
-Message displayed in gray bubble
-    ↓
-Cycle repeats
+### Docker
+```dockerfile
+FROM node:18-alpine
+WORKDIR /app
+COPY package*.json ./
+RUN npm ci
+COPY . .
+RUN npm run build
+EXPOSE 3000
+CMD ["npm", "start"]
 ```
 
----
+### Environment Variables
+- `NEXT_PUBLIC_ELEVENLABS_AGENT_ID` - Required for agent connection
 
-## API Integration
+## 📚 Future Enhancements
 
-The app uses the ElevenLabs React SDK which handles:
-- WebRTC connection establishment
-- Audio streaming
-- Message serialization
-- Error handling
-
-No backend required - the SDK connects directly to ElevenLabs servers.
-
----
-
-## Performance
-
-### Bundle Size
-- Total: 227 KB first-load JS
-- Components: 125 KB (main code)
-- Shared: 102 KB (dependencies)
-
-### Optimization Techniques
-- CSS animations (not JavaScript)
-- Efficient message rendering
-- Resource cleanup on disconnect
-- Lazy loading of dependencies
-
-### Lighthouse Scores
-Expected scores on modern hardware:
-- Performance: 95+
-- Accessibility: 90+
-- Best Practices: 95+
-- SEO: 100
-
----
-
-## Browser Support
-
-| Browser | Version | Support |
-|---------|---------|---------|
-| Chrome | 90+ | ✅ Full |
-| Firefox | 88+ | ✅ Full |
-| Safari | 14+ | ✅ Full |
-| Edge | 90+ | ✅ Full |
-| IE | Any | ❌ Not supported |
-
----
-
-## Troubleshooting
-
-### Common Issues
-
-**"ConnectionError.internal"**
-- Check internet connection
-- Verify Agent ID is correct
-- Try a different network
-- Check browser console for details
-
-**Microphone not working**
-- Check microphone permissions
-- Verify microphone is enabled in OS
-- Test in another app first
-- Try different browser
-
-**Messages not appearing**
-- Refresh the page
-- Check browser console for errors
-- Verify Agent is active
-- Check network in DevTools
-
-See [TROUBLESHOOTING.md](./TROUBLESHOOTING.md) for comprehensive solutions.
-
----
-
-## Debug Mode
-
-For development and troubleshooting:
-
-1. **Open Browser Console** - `F12` → Console tab
-2. **Watch Log Messages** - Connection, errors, message flow
-3. **Check Network** - DevTools → Network tab
-4. **Inspect State** - React DevTools extension
-
-See [DEBUG.md](./DEBUG.md) for detailed debugging guide.
-
----
-
-## Environment Variables
-
-### Required
-```env
-NEXT_PUBLIC_ELEVENLABS_AGENT_ID=your_agent_id
-```
-
-The `NEXT_PUBLIC_` prefix makes it available in browser code.
-
-### Optional (for future use)
-```env
-NEXT_PUBLIC_API_URL=https://api.elevenlabs.io
-NEXT_PUBLIC_DEBUG=true
-```
-
----
-
-## Contributing
-
-To improve this project:
-
-1. Fork or clone the repository
-2. Create a feature branch
-3. Make your changes
-4. Test thoroughly
-5. Submit a pull request
-
-Areas for contribution:
-- Additional UI themes
-- Message export functionality
-- Recording/playback features
-- Analytics integration
-- Accessibility improvements
-
----
-
-## Documentation
-
-- **[QUICKSTART.md](./QUICKSTART.md)** - Get started in 3 steps
-- **[IMPLEMENTATION_SUMMARY.md](./IMPLEMENTATION_SUMMARY.md)** - Technical details
-- **[TROUBLESHOOTING.md](./TROUBLESHOOTING.md)** - Error solutions
-- **[DEBUG.md](./DEBUG.md)** - Debugging guide
-- **[ElevenLabs Docs](https://elevenlabs.io/docs)** - Official documentation
-
----
-
-## Keyboard Shortcuts
-
-- `F12` - Open browser DevTools
-- `Ctrl+Shift+R` (Windows) / `Cmd+Shift+R` (Mac) - Hard refresh
-- `Ctrl+K` (Windows) / `Cmd+K` (Mac) - Focus search (if implemented)
-
----
-
-## Performance Tips
-
-1. **Close unused browser tabs** - Frees up resources
-2. **Disable browser extensions** - Some interfere with WebRTC
-3. **Use wired connection** - More stable than WiFi
-4. **Restart browser periodically** - Clears memory
-
----
-
-## Security Considerations
-
-### What's Secure
-- ✅ Agent ID is public (public agents)
-- ✅ No sensitive data stored locally
-- ✅ WebRTC encryption is automatic
-- ✅ Uses HTTPS/WSS for all connections
-
-### Best Practices
-- ❌ Don't share personal information with agent
-- ❌ Don't include passwords in conversations
-- ⚠️ Treat agent responses as information, not advice
-- ⚠️ Keep browser updated for security patches
-
-### Private Agents
-If using a private agent, you'll need:
-- Signed URLs from your backend
-- Conversation tokens
-- Additional authentication
-
----
-
-## License
-
-This project is provided as-is for use with ElevenLabs agents.
-
----
-
-## Support
-
-### Getting Help
-1. Check [TROUBLESHOOTING.md](./TROUBLESHOOTING.md)
-2. Review [DEBUG.md](./DEBUG.md)
-3. Check browser console for errors
-4. Visit [ElevenLabs Support](https://elevenlabs.io/support)
-
-### Reporting Issues
-Include:
-- Browser type and version
-- Error messages from console
-- Steps to reproduce
-- Network type (WiFi, cellular, etc.)
-
----
-
-## Roadmap
-
-Potential future features:
-- [ ] Message persistence (save conversations)
-- [ ] Export conversation as PDF/text
-- [ ] Voice settings (microphone selection, volume)
+### Phase 2 (Post-Hackathon)
+- [ ] Persistent database (PostgreSQL/MongoDB)
+- [ ] User authentication & multi-user support
+- [ ] Email integration for summary sharing
+- [ ] Conversation history export (PDF/CSV)
+- [ ] Advanced guardrail system
+- [ ] Analytics dashboard
+- [ ] Integration with EHR systems
+- [ ] Voice input settings (microphone selection)
 - [ ] Dark/light mode toggle
-- [ ] Conversation analytics
-- [ ] Multi-language support
-- [ ] Custom themes
-- [ ] Voice recording playback
+- [ ] Accessibility improvements (ARIA labels, keyboard nav)
+
+### Phase 3 (Production)
+- [ ] HIPAA compliance
+- [ ] End-to-end encryption
+- [ ] Audit logging
+- [ ] Rate limiting & DDoS protection
+- [ ] Multi-region deployment
+- [ ] Advanced NLP for better context understanding
+- [ ] Integration with wearable devices
+- [ ] Predictive health insights
+
+## 🤝 Contributing
+
+### Development Workflow
+1. Create feature branch: `git checkout -b feature/your-feature`
+2. Make changes and test locally
+3. Commit with clear messages: `git commit -m "Add feature description"`
+4. Push and create pull request
+
+### Code Style
+- Use TypeScript for type safety
+- Follow existing component patterns
+- Keep components focused and reusable
+- Add comments for complex logic
+
+## 📄 License
+
+This project is part of a hackathon submission. See LICENSE file for details.
+
+## 🆘 Troubleshooting
+
+### Microphone Not Working
+- Check browser permissions (Settings → Privacy → Microphone)
+- Ensure microphone is connected and working
+- Try a different browser
+- Refresh the page
+
+### Report Upload Fails
+- Verify JSON format matches schema
+- Check all required fields are present
+- Ensure test_date is in YYYY-MM-DD format
+- Validate lab_values array is not empty
+
+### No Agent Response
+- Check internet connection
+- Verify Agent ID in `.env.local`
+- Check browser console for errors (F12)
+- Try refreshing the page
+
+### Summary Not Generating
+- Ensure conversation had at least one exchange
+- Check network tab for API errors
+- Verify report_id was set correctly
+
+## 📞 Support
+
+For issues or questions:
+1. Check this README
+2. Review sample-report.json for format examples
+3. Check browser console (F12) for error messages
+4. Review ElevenLabs documentation: https://elevenlabs.io/docs
+
+## 🎓 Learning Resources
+
+- [ElevenLabs Docs](https://elevenlabs.io/docs)
+- [Next.js Documentation](https://nextjs.org/docs)
+- [React Documentation](https://react.dev)
+- [Tailwind CSS](https://tailwindcss.com/docs)
+- [TypeScript Handbook](https://www.typescriptlang.org/docs)
 
 ---
 
-## Changelog
+**Built with ❤️ for the Telehealth Hackathon**
 
-### v1.0.0 (December 11, 2025)
-- ✅ Initial release
-- ✅ WebRTC + WebSocket support
-- ✅ Animated orb visualization
-- ✅ Real-time transcription
-- ✅ Message history
-- ✅ Responsive design
-- ✅ Error handling with fallback
-
----
-
-## Credits
-
-Built with:
-- [ElevenLabs SDK](https://elevenlabs.io)
-- [Next.js](https://nextjs.org)
-- [React](https://react.dev)
-- [Tailwind CSS](https://tailwindcss.com)
-
----
-
-**Ready to chat? Start a conversation! 🎤**
-
-For more information, visit [elevenlabs.io](https://elevenlabs.io)
+**Version**: 1.0.0
+**Last Updated**: December 11, 2024

@@ -1,0 +1,26 @@
+{
+  "tools": [
+    {
+      "id": "get_report_context",
+      "name": "Get Report Context",
+      "description": "Retrieve the patient's uploaded health report for context during conversation",
+      "type": "client_tool",
+      "config_file": "tool_configs/get_report_context.json"
+    },
+    {
+      "id": "get_lab_reference_ranges",
+      "name": "Get Lab Reference Ranges",
+      "description": "Get standard reference ranges for common lab values",
+      "type": "server_tool",
+      "config_file": "tool_configs/get_lab_reference_ranges.json"
+    },
+    {
+      "id": "generate_summary",
+      "name": "Generate Summary",
+      "description": "Generate a summary of the conversation for the patient to download",
+      "type": "server_tool",
+      "config_file": "tool_configs/generate_summary.json"
+    }
+  ],
+  "version": "1.0.0"
+}

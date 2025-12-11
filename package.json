@@ -6,7 +6,16 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "elevenlabs:setup": "bash scripts/elevenlabs-cli-setup.sh",
+    "elevenlabs:list": "node scripts/elevenlabs-sync.js list",
+    "elevenlabs:pull": "node scripts/elevenlabs-sync.js pull",
+    "elevenlabs:push": "node scripts/elevenlabs-sync.js push",
+    "elevenlabs:push:dry": "node scripts/elevenlabs-sync.js push --dry-run",
+    "elevenlabs:status": "node scripts/elevenlabs-sync.js status",
+    "elevenlabs:validate": "node scripts/elevenlabs-sync.js validate",
+    "elevenlabs:show": "node scripts/elevenlabs-sync.js show",
+    "elevenlabs:edit": "node scripts/elevenlabs-sync.js edit"
   },
   "dependencies": {
     "@elevenlabs/react": "^0.12.0",
