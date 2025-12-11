@@ -1,0 +1,108 @@
+name: Deploy ElevenLabs Agent
+
+on:
+  push:
+    branches: [main, develop]
+    paths:
+      - '.elevenlabs/**'
+      - 'scripts/elevenlabs-sync.js'
+      - '.github/workflows/elevenlabs-deploy.yml'
+  workflow_dispatch:
+
+jobs:
+  validate:
+    name: Validate Agent Configuration
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      - name: Install ElevenLabs CLI
+        run: npm install -g @elevenlabs/cli
+
+      - name: Validate Configuration
+        run: node scripts/elevenlabs-sync.js validate
+
+      - name: Show Configuration
+        run: node scripts/elevenlabs-sync.js show telehealth-companion
+
+  deploy:
+    name: Deploy to ElevenLabs Platform
+    runs-on: ubuntu-latest
+    needs: validate
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      - name: Install ElevenLabs CLI
+        run: npm install -g @elevenlabs/cli
+
+      - name: Preview Changes (Dry Run)
+        env:
+          ELEVENLABS_API_KEY: ${{ secrets.ELEVENLABS_API_KEY }}
+        run: node scripts/elevenlabs-sync.js push --dry-run
+
+      - name: Deploy Agent
+        env:
+          ELEVENLABS_API_KEY: ${{ secrets.ELEVENLABS_API_KEY }}
+        run: node scripts/elevenlabs-sync.js push
+
+      - name: Check Agent Status
+        env:
+          ELEVENLABS_API_KEY: ${{ secrets.ELEVENLABS_API_KEY }}
+        run: node scripts/elevenlabs-sync.js status
+
+      - name: Create Deployment Notification
+        if: success()
+        uses: actions/github-script@v6
+        with:
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: '✅ ElevenLabs agent deployed successfully!'
+            })
+
+  sync-pull-request:
+    name: Sync Agent Configuration (Pull Request)
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      - name: Install ElevenLabs CLI
+        run: npm install -g @elevenlabs/cli
+
+      - name: Validate Configuration
+        run: node scripts/elevenlabs-sync.js validate
+
+      - name: Preview Changes
+        env:
+          ELEVENLABS_API_KEY: ${{ secrets.ELEVENLABS_API_KEY }}
+        run: node scripts/elevenlabs-sync.js push --dry-run
+
+      - name: Comment on PR
+        uses: actions/github-script@v6
+        with:
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: '🔍 Agent configuration validated. Ready to merge and deploy!'
+            })

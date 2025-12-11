@@ -1,0 +1,114 @@
+{
+  "report_id": "RPT-2025-DEC-00123",
+  "patient": {
+    "name": "Rohan Sharma",
+    "age": 32,
+    "gender": "Male",
+    "patient_id": "PTH23891"
+  },
+  "metadata": {
+    "sample_collected": "2025-12-12T08:34:00",
+    "reported_on": "2025-12-12T17:10:00",
+    "referring_doctor": "Dr. Neha Verma",
+    "lab_id": "MedCare Diagnostics"
+  },
+  "tests": [
+    {
+      "category": "Complete Blood Count",
+      "subcategory": "CBC",
+      "tests": [
+        {
+          "test_name": "Hemoglobin (Hb)",
+          "result": { "value": 13.4, "unit": "g/dL", "raw_text": null },
+          "reference_range": { "low": 13.0, "high": 17.0, "condition": null },
+          "flag": { "status": "normal", "flag_reason": null }
+        },
+        {
+          "test_name": "Total WBC Count",
+          "result": { "value": 7800, "unit": "cells/µL", "raw_text": null },
+          "reference_range": { "low": 4000, "high": 11000, "condition": null },
+          "flag": { "status": "normal", "flag_reason": null }
+        },
+        {
+          "test_name": "RBC Count",
+          "result": { "value": 4.82, "unit": "million/µL", "raw_text": null },
+          "reference_range": { "low": 4.5, "high": 5.9, "condition": null },
+          "flag": { "status": "normal", "flag_reason": null }
+        }
+      ]
+    },
+    {
+      "category": "Lipid Profile",
+      "subcategory": null,
+      "tests": [
+        {
+          "test_name": "Total Cholesterol",
+          "result": { "value": 186, "unit": "mg/dL", "raw_text": null },
+          "reference_range": { "low": null, "high": 200, "condition": "<200" },
+          "flag": { "status": "normal", "flag_reason": null }
+        },
+        {
+          "test_name": "HDL Cholesterol",
+          "result": { "value": 48, "unit": "mg/dL", "raw_text": null },
+          "reference_range": { "low": 40, "high": null, "condition": ">40" },
+          "flag": { "status": "normal", "flag_reason": null }
+        },
+        {
+          "test_name": "LDL Cholesterol",
+          "result": { "value": 116, "unit": "mg/dL", "raw_text": null },
+          "reference_range": { "low": null, "high": 130, "condition": "<130" },
+          "flag": { "status": "normal", "flag_reason": null }
+        }
+      ]
+    },
+    {
+      "category": "Blood Sugar",
+      "subcategory": null,
+      "tests": [
+        {
+          "test_name": "Fasting Blood Glucose",
+          "result": { "value": 92, "unit": "mg/dL", "raw_text": null },
+          "reference_range": { "low": 70, "high": 99, "condition": null },
+          "flag": { "status": "normal", "flag_reason": null }
+        },
+        {
+          "test_name": "HbA1c",
+          "result": { "value": 5.4, "unit": "%", "raw_text": null },
+          "reference_range": { "low": null, "high": 5.7, "condition": "<5.7" },
+          "flag": { "status": "normal", "flag_reason": null }
+        }
+      ]
+    },
+    {
+      "category": "Vitamins",
+      "subcategory": null,
+      "tests": [
+        {
+          "test_name": "Vitamin D (25-OH)",
+          "result": { "value": 28, "unit": "ng/mL", "raw_text": null },
+          "reference_range": { "low": 30, "high": 100, "condition": "30–100" },
+          "flag": { "status": "low", "flag_reason": "Below recommended range" }
+        },
+        {
+          "test_name": "Vitamin B12",
+          "result": { "value": 312, "unit": "pg/mL", "raw_text": null },
+          "reference_range": { "low": 200, "high": 900, "condition": null },
+          "flag": { "status": "normal", "flag_reason": null }
+        }
+      ]
+    }
+  ],
+  "summary": {
+    "abnormal_tests": [
+      {
+        "test_name": "Vitamin D (25-OH)",
+        "category": "Vitamins",
+        "result_value": 28,
+        "flag": "low"
+      }
+    ],
+    "critical_alert": false,
+    "doctor_notes": null,
+    "lab_comments": "Report verified by pathologist."
+  }
+}

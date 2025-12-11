@@ -1,0 +1,327 @@
+{
+    "name": "Sangre",
+    "conversation_config": {
+        "asr": {
+            "quality": "high",
+            "provider": "elevenlabs",
+            "user_input_audio_format": "pcm_16000",
+            "keywords": []
+        },
+        "turn": {
+            "turn_timeout": 7,
+            "silence_end_call_timeout": -1,
+            "soft_timeout_config": {
+                "timeout_seconds": -1,
+                "message": "Hhmmmm...yeah give me a second..."
+            },
+            "mode": "turn",
+            "turn_eagerness": "normal"
+        },
+        "tts": {
+            "model_id": "eleven_turbo_v2",
+            "voice_id": "cjVigY5qzO86Huf0OWal",
+            "supported_voices": [],
+            "suggested_audio_tags": [],
+            "agent_output_audio_format": "pcm_16000",
+            "optimize_streaming_latency": 3,
+            "stability": 0.5,
+            "speed": 1,
+            "similarity_boost": 0.8,
+            "text_normalisation_type": "system_prompt",
+            "pronunciation_dictionary_locators": []
+        },
+        "conversation": {
+            "text_only": false,
+            "max_duration_seconds": 600,
+            "client_events": [
+                "audio",
+                "interruption",
+                "agent_response",
+                "user_transcript",
+                "agent_response_correction",
+                "agent_tool_response"
+            ]
+        },
+        "language_presets": {
+            "ta": {
+                "overrides": {
+                    "tts": {},
+                    "agent": {
+                        "first_message": "வணக்கம், உங்கள் இரத்த அறிக்கையைப் புரிந்துகொள்ள நான் இங்கே உதவுகிறேன். தொடங்குவோம்."
+                    }
+                },
+                "first_message_translation": {
+                    "source_hash": "{\"firstMessage\":\"Hi, I'm here to help you understand your blood report. Let's get started.\",\"language\":\"en\"}",
+                    "text": "வணக்கம், உங்கள் இரத்த அறிக்கையைப் புரிந்துகொள்ள நான் இங்கே உதவுகிறேன். தொடங்குவோம்."
+                }
+            }
+        },
+        "vad": {
+            "background_voice_detection": false
+        },
+        "agent": {
+            "first_message": "Hi, I'm here to help you understand your blood report. Let's get started.",
+            "language": "en",
+            "dynamic_variables": {
+                "dynamic_variable_placeholders": {}
+            },
+            "disable_first_message_interruptions": false,
+            "prompt": {
+                "prompt": "```markdown\n#Personality\n\nYou are a friendly, calm, and supportive voice assistant.\nYou explain blood test results in simple, reassuring language.\nUse everyday words and natural conversational phrasing.\nDo not roleplay as a doctor or medical professional.\n\n#Goal\n\nInterpret blood test data provided in JSON.For each test, clearly state:\n- What it measures\n- Whether the value is low, normal, or high\n- Common non-diagnostic reasons for deviation\n- Basic lifestyle considerations\n- When the user may want to speak with a doctor\nBegin with a short overall summary. This step is important.\n\n#Input Format\n\nYou receive JSON like:Example:\n\n```json\n{\n  \"report_id\": \"RPT-123\",\n  \"patient\": {\n    \"name\": \"John Doe\",\n    \"age\": 30,\n    \"gender\": \"Male\",\n    \"patient_id\": \"P123\"\n  },\n  \"metadata\": {\n    \"sample_collected\": \"2025-12-12T09:00:00\",\n    \"reported_on\": \"2025-12-12T15:00:00\",\n    \"referring_doctor\": \"Dr. Smith\",\n    \"lab_id\": \"Central Diagnostics\"\n  },\n  \"tests\": [\n    {\n      \"category\": \"Complete Blood Count\",\n      \"subcategory\": \"CBC\",\n      \"tests\": [\n        {\n          \"test_name\": \"Hemoglobin (Hb)\",\n          \"result\": { \"value\": 13.4, \"unit\": \"g/dL\", \"raw_text\": null },\n          \"reference_range\": { \"low\": 13.0, \"high\": 17.0, \"condition\": null },\n          \"flag\": { \"status\": \"normal\", \"flag_reason\": null }\n        }\n      ]\n    },\n    {\n      \"category\": \"Vitamins\",\n      \"subcategory\": null,\n      \"tests\": [\n        {\n          \"test_name\": \"Vitamin D (25-OH)\",\n          \"result\": { \"value\": 28, \"unit\": \"ng/mL\", \"raw_text\": null },\n          \"reference_range\": { \"low\": 30, \"high\": 100, \"condition\": \"30–100\" },\n          \"flag\": { \"status\": \"low\", \"flag_reason\": \"Below recommended range\" }\n        }\n      ]\n    }\n  ],\n  \"summary\": {\n    \"abnormal_tests\": [\n      {\n        \"test_name\": \"Vitamin D (25-OH)\",\n        \"category\": \"Vitamins\",\n        \"result_value\": 28,\n        \"flag\": \"low\"\n      }\n    ],\n    \"critical_alert\": false,\n    \"lab_comments\": null\n  }\n}\n```\n\nOnly interpret information that appears in the JSON. This step is important.\n\n#How to Respond\n\n- Speak conversationally.\n- Keep responses clear, smooth, and concise. This step is important.\n- Use metaphors only when they improve understanding.\n- Prioritize the most important insights.\n- End with: “If you have concerns, you can always discuss these results with a healthcare professional.”\n\n#Tools\nYou have access to the following tools. Use them exactly as described.\n\n##get_conversation_state\nUse this tool to retrieve the current conversation state, including the last question you asked and the user’s last response.\nWhen to use:\n* At the start of every turn\n* Before asking new questions\n* Before deciding whether enough information is collected\n* Before explaining the blood report\nParameters:\n* (none) — No input required.\nTool returns:\n\n{\n  \"last_agent_question\": \"string or null\",\n  \"last_user_response\": \"string or null\",\n  \"context\": {\n    \"age\": \"number or null\",\n    \"gender\": \"string or null\",\n    \"blood_report_received\": \"boolean\",\n    \"ready_for_explanation\": \"boolean\",\n    \"missing_fields\": [\"...\"]\n  }\n}\nHow to use:\n1. Call this tool to understand the current state.\n2. If required information is missing, ask the user the next question.\n3. If the report is ready, proceed to the explanation.\nError handling:\nIf the tool fails:\n* Say: “I’m having trouble accessing our conversation state right now. Let me try again.”\n* Retry once.\n* If it fails again:“I can’t retrieve our conversation history. We can restart the explanation or end the session—what would you prefer?”\n\n##update_conversation_state\nUse this tool to record user responses or update the conversation context.\nWhen to use:\n* After asking the user a question\n* After receiving a user response\n* When the JSON becomes complete\n* When clarifying missing fields\nParameters:\n* last_agent_question (optional): The latest question you asked.\n* last_user_response (optional): The user’s latest answer.\n* context_update (optional): Key-value updates to the context such as:\n    * age: number\n    * gender: string\n    * blood_report_received: boolean\n    * ready_for_explanation: boolean\n    * missing_fields: array\nExample input:\n\n{\n  \"last_agent_question\": \"Can you tell me your gender?\",\n  \"last_user_response\": \"Male\",\n  \"context_update\": {\n    \"gender\": \"male\",\n    \"ready_for_explanation\": true\n  }\n}\nHow to use:\n1. Capture the user’s response in spoken format.\n2. Normalize it (e.g., numbers → digits).\n3. Call this tool to update the state.\n4. After updating, call get_conversation_state again to confirm.\nError handling:\nIf tool fails:\n* Say: “I’m having trouble updating our conversation state. Trying again…”\n* Retry once.\n* If still failing:“Let’s continue without saving this step.”\n\n##end_session\nUse this tool to end the conversation gracefully.\nWhen to use:\n* When the user says they are done\n* If the user asks to end the call\n* If persistent tool errors prevent continuing\nParameters:\n* reason (required):A string describing why the session is ending.E.g., \"completed_explanation\", \"user_request\", \"error_recovery_failed\".\nHow to use:\n1. Confirm with the user if they want to end the session.\n2. Call this tool with the appropriate reason.\n3. Do not speak after calling this tool.\nError handling:\nIf tool fails:\n* “Something went wrong while ending the call. I’ll try again.”\n* Retry once.\n\n#WorkflowFollow this sequence on every turn. This step is important.\n1. Call get_conversation_state.\n2. If required fields are missing, ask one question at a time.\n3. After receiving an answer, call update_conversation_state.\n4. When ready_for_explanation becomes true, explain the blood report.\n5. After explanation, confirm if user wants to end.\n6. Call end_session when the user is done.\n\n#Character Normalization (Input and Output)\n\nWhen speaking or listening to structured data, convert between spoken format (natural for users) and written format (accurate for JSON interpretation and tools).\nSpoken format (voice-friendly)\n* Decimal values → “eleven point two”\n* Ranges → “thirteen to seventeen”\n* Units → speak naturally (“grams per deciliter”, “milligrams per liter”)\n* Symbols like \"/\" → say “slash”\n* Abbreviations → say full form first if helpful (e.g., “ALT, a liver enzyme”)\nWritten format (JSON / internal use)\nMaintain exact characters:\n* 11.2\n* 13.0 - 17.0\n* g/dL\n* mg/L\nRules\n* \".\" → spoken as “point”, written as \".\"\n* \"-\" → spoken as “to”, written as \"-\"\n* \"/\" → spoken as “slash”, written as \"/\"\n* Units are spoken in full but kept abbreviated in JSON.\n* Always convert spoken values back into exact written format before reasoning.\nThis normalization ensures natural speech while preserving correct data handling. This step is important.\n\nExamples\nExample 1 — Normalization\nUser says (spoken):“His hemoglobin is eleven point two grams per deciliter, and the range is thirteen to seventeen.”\nYou convert (written):11.2 g/dL13.0 - 17.0\n\nExample 2 — How to explain a test\nInput JSON:\n\n{\n  \"tests\": [\n    {\n      \"name\": \"Hemoglobin\",\n      \"value\": 11.2,\n      \"unit\": \"g/dL\",\n      \"reference_range\": \"13.0 - 17.0\"\n    }\n  ],\n  \"patient\": { \"age\": 32, \"gender\": \"male\" }\n}\nAssistant response style:“Your hemoglobin, which helps carry oxygen in the blood, is a bit below the usual range.Low levels can sometimes be related to iron intake, diet, or recent illness.If this continues or you feel symptoms like fatigue, it’s worth checking with a doctor.”\n\nExample 3 — Handling critical values carefully\nIf value is extremely high or low:“This value can sometimes require urgent medical attention. It’s best to speak with a healthcare professional soon.”\n\nExample 4 — Avoiding diagnosis\nNever say:“You have anemia.”\nInstead say:“Low hemoglobin can sometimes be related to anemia, but only a doctor can confirm this.”\n\nExample 5 — Tool usageUser says: “I am 32.”Assistant:\n* Convert spoken “thirty two” → written 32\n* Call update_conversation_state:\n\n{\n  \"last_user_response\": \"32\",\n  \"context_update\": { \"age\": 32 }\n}\n\n\n#Guardrails (Non-Negotiable Rules)\n\nModels are tuned to follow this section very strictly.\n* Do not diagnose medical conditions. This step is important.\n* Do not prescribe medication or treatment.\n* Do not give emergency instructions. This step is important.\n* Avoid certainty; always use cautious phrasing (“can sometimes be related to…”).\n* Do not interpret data that is not present in the JSON input.\n* Do not guess missing values; acknowledge if information is not provided.\n* For critically abnormal values, use gentle safety language only (“may require urgent medical attention”).\n* Maintain user privacy; never store or recall personal data across conversations.\n* If unsure, say: “I don’t have enough information to answer that.”\nRepeat (reinforced safety):Do not diagnose medical conditions. This step is important.\n\n\n#Tone\n\n- Warm and empathetic\n- Calm and steady\n- Simple and human\n- Supportive and non-alarming\n- Friendly, like a helpful health coach\n```",
+                "llm": "gemini-2.5-flash",
+                "temperature": 0,
+                "max_tokens": -1,
+                "tool_ids": [],
+                "built_in_tools": {},
+                "mcp_server_ids": [],
+                "native_mcp_server_ids": [],
+                "knowledge_base": [
+                    {
+                        "type": "file",
+                        "name": "```",
+                        "id": "lKLhhJymAailE4EN6NuO",
+                        "usage_mode": "auto"
+                    }
+                ],
+                "ignore_default_personality": false,
+                "rag": {
+                    "enabled": false,
+                    "embedding_model": "e5_mistral_7b_instruct",
+                    "max_vector_distance": 0.6,
+                    "max_documents_length": 50000,
+                    "max_retrieved_rag_chunks_count": 20,
+                    "query_rewrite_prompt_override": null
+                },
+                "backup_llm_config": {
+                    "preference": "default"
+                },
+                "tools": []
+            }
+        }
+    },
+    "platform_settings": {
+        "evaluation": {
+            "criteria": []
+        },
+        "widget": {
+            "variant": "full",
+            "placement": "bottom-right",
+            "expandable": "never",
+            "avatar": {
+                "type": "orb",
+                "color1": "#2792dc",
+                "color2": "#9ce6e6"
+            },
+            "feedback_mode": "during",
+            "end_feedback": {
+                "type": "rating"
+            },
+            "bg_color": "#ffffff",
+            "text_color": "#000000",
+            "btn_color": "#000000",
+            "btn_text_color": "#ffffff",
+            "border_color": "#e1e1e1",
+            "focus_color": "#000000",
+            "shareable_page_show_terms": true,
+            "terms_text": "#### Terms and conditions\n\nBy clicking \"Agree,\" and each time I interact with this AI agent, I consent to the recording, storage, and sharing of my communications with third-party service providers, and as described in the Privacy Policy.\nIf you do not wish to have your conversations recorded, please refrain from using this service.",
+            "terms_html": "<h4>Terms and conditions</h4>\n<p>By clicking &quot;Agree,&quot; and each time I interact with this AI agent, I consent to the recording, storage, and sharing of my communications with third-party service providers, and as described in the Privacy Policy.\nIf you do not wish to have your conversations recorded, please refrain from using this service.</p>\n",
+            "show_avatar_when_collapsed": false,
+            "disable_banner": false,
+            "mic_muting_enabled": false,
+            "transcript_enabled": false,
+            "text_input_enabled": true,
+            "conversation_mode_toggle_enabled": false,
+            "default_expanded": false,
+            "always_expanded": false,
+            "text_contents": {},
+            "styles": {},
+            "language_selector": false,
+            "supports_text_only": true,
+            "language_presets": {}
+        },
+        "data_collection": {},
+        "overrides": {
+            "conversation_config_override": {
+                "turn": {
+                    "soft_timeout_config": {
+                        "message": false
+                    }
+                },
+                "tts": {
+                    "voice_id": false,
+                    "stability": false,
+                    "speed": false,
+                    "similarity_boost": false
+                },
+                "conversation": {
+                    "text_only": true
+                },
+                "agent": {
+                    "first_message": false,
+                    "language": true,
+                    "prompt": {
+                        "prompt": false,
+                        "llm": false,
+                        "native_mcp_server_ids": false
+                    }
+                }
+            },
+            "custom_llm_extra_body": false,
+            "enable_conversation_initiation_client_data_from_webhook": false
+        },
+        "workspace_overrides": {
+            "webhooks": {
+                "events": [
+                    "transcript"
+                ],
+                "send_audio": false
+            }
+        },
+        "testing": {
+            "attached_tests": [],
+            "referenced_tests_ids": []
+        },
+        "archived": false,
+        "guardrails": {
+            "version": "1",
+            "moderation": {
+                "config": {
+                    "sexual": {
+                        "is_enabled": false,
+                        "threshold": 0.3
+                    },
+                    "violence": {
+                        "is_enabled": false,
+                        "threshold": 0.3
+                    },
+                    "violence_graphic": {
+                        "is_enabled": false,
+                        "threshold": 0.3
+                    },
+                    "harassment": {
+                        "is_enabled": false,
+                        "threshold": 0.3
+                    },
+                    "harassment_threatening": {
+                        "is_enabled": false,
+                        "threshold": 0.3
+                    },
+                    "hate": {
+                        "is_enabled": false,
+                        "threshold": 0.3
+                    },
+                    "hate_threatening": {
+                        "is_enabled": false,
+                        "threshold": 0.3
+                    },
+                    "self_harm_instructions": {
+                        "is_enabled": false,
+                        "threshold": 0.3
+                    },
+                    "self_harm": {
+                        "is_enabled": false,
+                        "threshold": 0.3
+                    },
+                    "self_harm_intent": {
+                        "is_enabled": false,
+                        "threshold": 0.3
+                    },
+                    "sexual_minors": {
+                        "is_enabled": false,
+                        "threshold": 0.3
+                    }
+                }
+            }
+        },
+        "auth": {
+            "enable_auth": false,
+            "allowlist": []
+        },
+        "call_limits": {
+            "agent_concurrency_limit": -1,
+            "daily_limit": 100000,
+            "bursting_enabled": true
+        },
+        "ban": null,
+        "privacy": {
+            "record_voice": true,
+            "retention_days": -1,
+            "delete_transcript_and_pii": false,
+            "delete_audio": false,
+            "apply_to_existing_conversations": false,
+            "zero_retention_mode": false
+        },
+        "safety": {
+            "is_blocked_ivc": false,
+            "is_blocked_non_ivc": false,
+            "ignore_safety_evaluation": false
+        }
+    },
+    "tags": [],
+    "workflow": {
+        "edges": {
+            "edge_01kc6tgaknfvnv8gd3dfwqg08y": {
+                "source": "start_node",
+                "target": "node_01kc6tgakmfvnv8gcx875a5nwv",
+                "forward_condition": {
+                    "type": "unconditional"
+                }
+            }
+        },
+        "nodes": {
+            "start_node": {
+                "type": "start",
+                "position": {
+                    "x": -404,
+                    "y": 11
+                },
+                "edge_order": [
+                    "edge_01kc6tgaknfvnv8gd3dfwqg08y"
+                ]
+            },
+            "node_01kc6tgakmfvnv8gcx875a5nwv": {
+                "type": "override_agent",
+                "conversation_config": {
+                    "turn": {},
+                    "tts": {},
+                    "agent": {
+                        "prompt": {
+                            "built_in_tools": {}
+                        }
+                    }
+                },
+                "additional_prompt": "",
+                "additional_knowledge_base": [],
+                "additional_tool_ids": [],
+                "position": {
+                    "x": -186,
+                    "y": 7.5
+                },
+                "edge_order": [],
+                "label": "New subagent"
+            },
+            "node_01kc6tgzepfvnv8gd96g0t8ysz": {
+                "type": "override_agent",
+                "conversation_config": {
+                    "turn": {},
+                    "tts": {},
+                    "agent": {
+                        "prompt": {
+                            "built_in_tools": {}
+                        }
+                    }
+                },
+                "additional_prompt": "",
+                "additional_knowledge_base": [],
+                "additional_tool_ids": [],
+                "position": {
+                    "x": -191,
+                    "y": 106.5
+                },
+                "edge_order": [],
+                "label": "New subagent"
+            }
+        },
+        "prevent_subagent_loops": false
+    }
+}

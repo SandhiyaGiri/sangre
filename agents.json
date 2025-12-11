@@ -1,0 +1,8 @@
+{
+    "agents": [
+        {
+            "config": "agent_configs/Sangre.json",
+            "id": "agent_5001kc6qf5h5fd5rmmbe7p24jf7q"
+        }
+    ]
+}
