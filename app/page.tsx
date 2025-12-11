@@ -69,8 +69,20 @@ export default function Home() {
       }
     },
     onError: (error: any) => {
-      console.error('Error:', error);
+      console.error('Conversation error:', error);
       setIsLoading(false);
+      const errorMessage = error?.message || String(error);
+      if (errorMessage.includes('ConnectionError') || errorMessage.includes('connection')) {
+        setMessages((prev) => [
+          ...prev,
+          {
+            id: `error-${Date.now()}`,
+            role: 'agent',
+            message: 'Connection error occurred. Please try starting the conversation again.',
+            timestamp: new Date(),
+          },
+        ]);
+      }
     },
   });
 
@@ -79,17 +91,54 @@ export default function Home() {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, currentTranscription]);
 
+  // Cleanup timeout on disconnect
+  useEffect(() => {
+    return () => {
+      if (agentSpeakingTimeoutRef.current) {
+        clearTimeout(agentSpeakingTimeoutRef.current);
+      }
+    };
+  }, []);
+
   const startConversation = async () => {
     setIsLoading(true);
     setMessages([]);
     messageCountRef.current = 0;
     try {
-      await conversation.startSession({
-        agentId: process.env.NEXT_PUBLIC_ELEVENLABS_AGENT_ID!,
-        connectionType: 'webrtc',
-      });
+      const agentId = process.env.NEXT_PUBLIC_ELEVENLABS_AGENT_ID;
+      if (!agentId) {
+        throw new Error('Agent ID not configured in environment variables');
+      }
+
+      console.log('Starting conversation with agent:', agentId);
+
+      // Try WebRTC first, with fallback to websocket
+      try {
+        await conversation.startSession({
+          agentId,
+          connectionType: 'webrtc',
+        });
+        console.log('Connected via WebRTC');
+      } catch (webrtcError) {
+        console.warn('WebRTC connection failed, attempting websocket fallback:', webrtcError);
+        // Fallback to websocket for text-based communication
+        await conversation.startSession({
+          agentId,
+          connectionType: 'websocket',
+        });
+        console.log('Connected via WebSocket');
+      }
     } catch (error) {
       console.error('Failed to start session:', error);
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: `error-${Date.now()}`,
+          role: 'agent',
+          message: `Connection failed: ${error instanceof Error ? error.message : String(error)}. Please check the Agent ID and try again.`,
+          timestamp: new Date(),
+        },
+      ]);
       setIsLoading(false);
     }
   };
